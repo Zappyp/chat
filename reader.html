@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="reader.css" />
+    <title>Чат текстовик</title>
+  </head>
+  <body>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
+      * {
+        font-family: "Open Sans", serif;
+        font-optical-sizing: auto;
+
+        box-sizing: border-box;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: rgb(0, 212, 255);
+        background: linear-gradient(
+          90deg,
+          rgba(0, 212, 255, 1) 0%,
+          rgba(63, 181, 255, 1) 17%,
+          rgba(0, 0, 0, 1) 35%,
+          rgba(0, 0, 0, 1) 62%,
+          rgba(0, 147, 238, 1) 84%,
+          rgba(38, 218, 255, 1) 100%
+        );
+        box-sizing: border-box;
+      }
+
+      #chat-container {
+        max-width: 800px;
+        margin: 20px auto;
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        box-sizing: border-box;
+      }
+
+      .message {
+        border-bottom: 1px solid #ddd;
+        padding: 10px 0;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+
+      .message:last-child {
+        border-bottom: none;
+      }
+
+      .sender {
+        font-weight: bold;
+        color: #333;
+
+        margin-bottom: 10px;
+      }
+      .text::before {
+        content: "- ";
+      }
+
+      .text {
+        color: #555;
+        margin-bottom: 5px;
+        margin-left: 10px;
+      }
+      .reactions:hover {
+        background-color: rgb(94, 168, 243);
+        cursor: pointer;
+      }
+      .reactions {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-left: 40px;
+        font-size: 14px;
+        /* color: white; */
+        /* background-color: #040404; */
+        border: solid black;
+        border-radius: 10px;
+        width: 25px;
+        height: 25px;
+      }
+    </style>
+    <div id="chat-container"></div>
+
+    <script>
+      "use strict";
+
+      // Завантаження JSON-файлу
+      fetch("result.json")
+        .then((response) => response.json())
+        .then((data) => {
+          const chatContainer = document.getElementById("chat-container");
+          const fragment = document.createDocumentFragment(); // Створюємо фрагмент
+
+          // Створення HTML для кожного повідомлення
+          data.messages.forEach((message) => {
+            if (message.text) {
+              const messageDiv = document.createElement("div");
+              messageDiv.className = "message";
+
+              // Дата та час
+              const date = new Date(message.date);
+              const dateTime = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+              const senderDiv = document.createElement("div");
+              senderDiv.className = "sender";
+              senderDiv.textContent = `${message.from} (${dateTime})`;
+
+              // Текст повідомлення
+              const textDiv = document.createElement("div");
+              textDiv.className = "text";
+              textDiv.textContent =
+                typeof message.text === "string"
+                  ? message.text
+                  : message.text.map((t) => t.text).join(" ");
+
+              // Реакція на повідомлення
+
+              messageDiv.appendChild(senderDiv);
+              messageDiv.appendChild(textDiv);
+
+              fragment.appendChild(messageDiv); // Додаємо до фрагмента
+              if (message.reactions && message.reactions.length > 0) {
+                const reactionsDiv = document.createElement("div");
+                reactionsDiv.className = "reactions";
+                reactionsDiv.textContent = ` ${message.reactions
+                  .map((reaction) => `${reaction.emoji} `)
+                  .join(",")}`;
+                messageDiv.appendChild(reactionsDiv);
+              }
+            }
+          });
+
+          chatContainer.appendChild(fragment); // Додаємо все одразу
+        })
+        .catch((error) => console.error("Помилка завантаження JSON:", error));
+    </script>
+  </body>
+</html>
